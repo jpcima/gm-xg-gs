@@ -137,9 +137,6 @@ static void print_instruments(char indicator, const std::map<uint32_t, Bank> &ba
         uint32_t bank_msb = bankno / 128;
         uint32_t bank_lsb = bankno % 128;
 
-        if (mode != Mode::GM && bankno == 0)
-            continue;
-
         if ((mode == Mode::MU1000 || mode == Mode::SonarXG) && indicator == 'P' /* && bankno != 0 */) {
             bank_msb = 127 - bank_msb;
         }
@@ -147,6 +144,14 @@ static void print_instruments(char indicator, const std::map<uint32_t, Bank> &ba
         for (unsigned n = 0; n < 128; ++n) {
             if (!bank.bank_ins[n])
                 continue;
+
+            if (mode != Mode::GM && bankno == 0)
+            {
+                if (indicator == 'M')
+                    continue;
+                if (indicator == 'P' && (n >= 35 || n <= 81))
+                    continue;
+            }
 
             std::string bank_name = bank.bank_name;
             if (mode == Mode::MU1000) {
