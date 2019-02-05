@@ -6,6 +6,8 @@ enum class Mode
     MU1000,
     MSGS,
     SC88,
+    SonarXG,
+    SonarGS,
 };
 
 struct Instrument

@@ -66,7 +66,7 @@ static void process_drum_bank(Mode mode, unsigned bankno1, unsigned bankno2, con
     unsigned bank_msb = bankno1;
     unsigned bank_pgm = bankno2;
 
-    if (mode == Mode::MU1000) {
+    if (mode == Mode::MU1000 || mode == Mode::SonarXG) {
         if (bankno1 % 128 != 0)
             throw std::runtime_error("Drum bank number invalid");
         bank_msb = bankno1 / 128;
@@ -140,7 +140,7 @@ static void print_instruments(char indicator, const std::map<uint32_t, Bank> &ba
         if (mode != Mode::GM && bankno == 0)
             continue;
 
-        if (mode == Mode::MU1000 && indicator == 'P' /* && bankno != 0 */) {
+        if ((mode == Mode::MU1000 || mode == Mode::SonarXG) && indicator == 'P' /* && bankno != 0 */) {
             bank_msb = 127 - bank_msb;
         }
 
@@ -198,6 +198,10 @@ int main(int argc, char *argv[])
         mode = Mode::MSGS;
     else if (!strcmp(argv[1], "sc"))
         mode = Mode::SC88;
+    else if (!strcmp(argv[1], "sonar-xg"))
+        mode = Mode::SonarXG;
+    else if (!strcmp(argv[1], "sonar-gs"))
+        mode = Mode::SonarGS;
     else {
         fprintf(stderr, "Bad mode name\n");
         return 1;
@@ -226,6 +230,18 @@ int main(int argc, char *argv[])
             return 1;
         process_melodics(mode, "Roland SC-8850");
         process_drums(mode, "Roland SC-8850 Drumsets");
+    }
+    else if (mode == Mode::SonarXG) {
+        if (ini.LoadFile("instrument/Sonar.ins") != SI_OK)
+            return 1;
+        process_melodics(mode, "Yamaha XG");
+        process_drums(mode, "Yamaha XG Drum Kits");
+    }
+    else if (mode == Mode::SonarGS) {
+        if (ini.LoadFile("instrument/Sonar.ins") != SI_OK)
+            return 1;
+        process_melodics(mode, "Roland GS");
+        process_drums(mode, "Roland GS Drumsets");
     }
 
     print_instruments('M', ::the_melodic_banks, mode);
